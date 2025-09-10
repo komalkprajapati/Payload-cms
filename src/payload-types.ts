@@ -69,6 +69,8 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    pages: Page;
+    posts: Post;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -77,6 +79,8 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -84,9 +88,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  globals: {
+    navbar: Navbar;
+    footer: Footer;
+  };
+  globalsSelect: {
+    navbar: NavbarSelect<false> | NavbarSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+  };
+  locale: 'en' | 'fr';
   user: User & {
     collection: 'users';
   };
@@ -158,6 +168,172 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: string;
+  name: string;
+  slug: string;
+  layout?:
+    | (
+        | {
+            heading?: string | null;
+            content?: string | null;
+            button?:
+              | {
+                  name?: string | null;
+                  url?: string | null;
+                  variant?: ('primary' | 'secondary') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            heading?: string | null;
+            content?: string | null;
+            imageDashboard?: (string | null) | Media;
+            imagePhone?: (string | null) | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contentImage';
+          }
+        | {
+            features: {
+              icon: string | Media;
+              heading: string;
+              content: string;
+              buttonText?: string | null;
+              url?: string | null;
+              sideImage?: (string | null) | Media;
+              bgImage?: (string | null) | Media;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'features';
+          }
+        | {
+            heading?: string | null;
+            cards?:
+              | {
+                  icon?: (string | null) | Media;
+                  title?: string | null;
+                  content?: string | null;
+                  bgImg?: (string | null) | Media;
+                  bgPosition?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            text?: string | null;
+            button?:
+              | {
+                  name?: string | null;
+                  url?: string | null;
+                  variant?: ('primary' | 'secondary') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cards';
+          }
+        | {
+            heading?: string | null;
+            subHeading?: string | null;
+            button?:
+              | {
+                  name?: string | null;
+                  url?: string | null;
+                  variant?: ('primary' | 'secondary') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            cards?:
+              | {
+                  steps?: string | null;
+                  title?: string | null;
+                  content?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contentCards';
+          }
+        | {
+            heading?: string | null;
+            subHeading?: string | null;
+            button?:
+              | {
+                  name?: string | null;
+                  url?: string | null;
+                  variant?: ('primary' | 'secondary') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            coin1?: (string | null) | Media;
+            coin2?: (string | null) | Media;
+            coin3?: (string | null) | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'banner';
+          }
+        | {
+            heading?: string | null;
+            button?: string | null;
+            articles?:
+              | {
+                  image?: (string | null) | Media;
+                  text?: string | null;
+                  date?: string | null;
+                  title?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'article';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  image?: (string | null) | Media;
+  publishedAt?: string | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -170,6 +346,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -255,6 +439,165 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              content?: T;
+              button?:
+                | T
+                | {
+                    name?: T;
+                    url?: T;
+                    variant?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        contentImage?:
+          | T
+          | {
+              heading?: T;
+              content?: T;
+              imageDashboard?: T;
+              imagePhone?: T;
+              id?: T;
+              blockName?: T;
+            };
+        features?:
+          | T
+          | {
+              features?:
+                | T
+                | {
+                    icon?: T;
+                    heading?: T;
+                    content?: T;
+                    buttonText?: T;
+                    url?: T;
+                    sideImage?: T;
+                    bgImage?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        cards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    content?: T;
+                    bgImg?: T;
+                    bgPosition?: T;
+                    id?: T;
+                  };
+              text?: T;
+              button?:
+                | T
+                | {
+                    name?: T;
+                    url?: T;
+                    variant?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        contentCards?:
+          | T
+          | {
+              heading?: T;
+              subHeading?: T;
+              button?:
+                | T
+                | {
+                    name?: T;
+                    url?: T;
+                    variant?: T;
+                    id?: T;
+                  };
+              cards?:
+                | T
+                | {
+                    steps?: T;
+                    title?: T;
+                    content?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        banner?:
+          | T
+          | {
+              heading?: T;
+              subHeading?: T;
+              button?:
+                | T
+                | {
+                    name?: T;
+                    url?: T;
+                    variant?: T;
+                    id?: T;
+                  };
+              coin1?: T;
+              coin2?: T;
+              coin3?: T;
+              id?: T;
+              blockName?: T;
+            };
+        article?:
+          | T
+          | {
+              heading?: T;
+              button?: T;
+              articles?:
+                | T
+                | {
+                    image?: T;
+                    text?: T;
+                    date?: T;
+                    title?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  image?: T;
+  publishedAt?: T;
+  metaTitle?: T;
+  metaDescription?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -284,6 +627,218 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navbar".
+ */
+export interface Navbar {
+  id: string;
+  smallLogo?: (string | null) | Media;
+  headline?: string | null;
+  logo?: (string | null) | Media;
+  logoname?: string | null;
+  dropDown?: {
+    label?: string | null;
+    dIcon?: (string | null) | Media;
+    url?: string | null;
+    items?:
+      | {
+          label?: string | null;
+          url?: string | null;
+          icon?: (string | null) | Media;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  links?:
+    | {
+        navLink?: string | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  translation?: (string | null) | Media;
+  title?: string | null;
+  languages?:
+    | {
+        languageName?: string | null;
+        language?: string | null;
+        code?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  signupButton?: string | null;
+  url?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: string;
+  logo?: (string | null) | Media;
+  logoname?: string | null;
+  copyright?: string | null;
+  bgImg?:
+    | {
+        backgroundImg?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  sections?:
+    | {
+        title?: string | null;
+        links?:
+          | {
+              label?: string | null;
+              url?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  newsletter?: {
+    title?: string | null;
+    description?: string | null;
+    placeholder?: string | null;
+  };
+  socialLinks?:
+    | {
+        platform?: ('facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube') | null;
+        url?: string | null;
+        icon?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  translation?: (string | null) | Media;
+  languageSelector?:
+    | {
+        label?: string | null;
+        code?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  legalLinks?:
+    | {
+        label?: string | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navbar_select".
+ */
+export interface NavbarSelect<T extends boolean = true> {
+  smallLogo?: T;
+  headline?: T;
+  logo?: T;
+  logoname?: T;
+  dropDown?:
+    | T
+    | {
+        label?: T;
+        dIcon?: T;
+        url?: T;
+        items?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              icon?: T;
+              id?: T;
+            };
+      };
+  links?:
+    | T
+    | {
+        navLink?: T;
+        url?: T;
+        id?: T;
+      };
+  translation?: T;
+  title?: T;
+  languages?:
+    | T
+    | {
+        languageName?: T;
+        language?: T;
+        code?: T;
+        id?: T;
+      };
+  signupButton?: T;
+  url?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  logo?: T;
+  logoname?: T;
+  copyright?: T;
+  bgImg?:
+    | T
+    | {
+        backgroundImg?: T;
+        id?: T;
+      };
+  sections?:
+    | T
+    | {
+        title?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  newsletter?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        placeholder?: T;
+      };
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        icon?: T;
+        id?: T;
+      };
+  translation?: T;
+  languageSelector?:
+    | T
+    | {
+        label?: T;
+        code?: T;
+        id?: T;
+      };
+  legalLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
