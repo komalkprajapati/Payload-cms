@@ -6,6 +6,7 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import {payloadCloudinaryPlugin} from '@jhb.software/payload-cloudinary-plugin'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -18,6 +19,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
+
   admin: {
     user: Users.slug,
     importMap: {
@@ -46,7 +48,19 @@ export default buildConfig({
   }),
   sharp,
   plugins: [
-    payloadCloudPlugin(),
     // storage-adapter-placeholder
+    payloadCloudPlugin(),
+
+    payloadCloudinaryPlugin({
+      uploadCollections: [Media], // enable for Media collection
+      credentials: {
+        apiKey: process.env.CLOUDINARY_API_KEY!,
+        apiSecret: process.env.CLOUDINARY_API_SECRET!,
+      },
+      cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
+        folder: 'payload-media', 
+      },
+    }),
   ],
 })
