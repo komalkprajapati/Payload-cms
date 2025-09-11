@@ -55,7 +55,7 @@ async function migrate() {
       // Update MongoDB record with Cloudinary URL
       await mediaCollection.updateOne(
         { _id: record._id },
-        { $set: { cloudinaryUrl: result.secure_url } }
+        { $set: { url: result.secure_url } }
       );
 
       console.log(`✅ Uploaded ${record.filename || record._id} → ${result.secure_url}`);
