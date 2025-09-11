@@ -52,7 +52,7 @@ export default buildConfig({
     payloadCloudPlugin(),
 
     payloadCloudinaryPlugin({
-      uploadCollections: [Media], // enable for Media collection
+      uploadCollections: [Media], 
       credentials: {
         apiKey: process.env.CLOUDINARY_API_KEY!,
         apiSecret: process.env.CLOUDINARY_API_SECRET!,
