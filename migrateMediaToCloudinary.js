@@ -1,7 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs';
-import path from 'path';
+import fetch from 'node-fetch'; // make sure to install this: npm i node-fetch
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,9 +13,8 @@ cloudinary.config({
 });
 
 const MONGO_URI = process.env.DATABASE_URI;
-const DATABASE_NAME = 'cms'; // Replace with your MongoDB DB name
-const MEDIA_COLLECTION = 'media'; // Your Payload Media collection slug
-const LOCAL_MEDIA_PATH = path.join(process.cwd(), 'media'); // Local media folder
+const DATABASE_NAME = 'cms'; // replace if needed
+const MEDIA_COLLECTION = 'media'; // your Payload Media collection slug
 
 async function migrate() {
   const client = new MongoClient(MONGO_URI);
@@ -28,26 +26,41 @@ async function migrate() {
   console.log(`Found ${mediaRecords.length} media records.`);
 
   for (const record of mediaRecords) {
-    const localFile = path.join(LOCAL_MEDIA_PATH, record.filename); // filename field from Payload
-    if (!fs.existsSync(localFile)) {
-      console.log(`File not found: ${localFile}, skipping...`);
+    if (!record.url) {
+      console.log(`No URL for record ${record._id}, skipping...`);
       continue;
     }
 
     try {
-      const result = await cloudinary.uploader.upload(localFile, {
-        folder: 'payload-media',
+      console.log(`Fetching ${record.url} ...`);
+      const response = await fetch(record.url);
+
+      if (!response.ok) {
+        console.log(`Failed to fetch ${record.url}, skipping...`);
+        continue;
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+
+      // Upload to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream({ folder: 'payload-media' }, (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          })
+          .end(buffer);
       });
 
-      // Update Payload media record with Cloudinary URL
+      // Update MongoDB record with Cloudinary URL
       await mediaCollection.updateOne(
         { _id: record._id },
         { $set: { url: result.secure_url } }
       );
 
-      console.log(`Uploaded ${record.filename} → ${result.secure_url}`);
+      console.log(`✅ Uploaded ${record.filename || record._id} → ${result.secure_url}`);
     } catch (err) {
-      console.error(`Error uploading ${record.filename}:`, err.message);
+      console.error(`❌ Error processing ${record._id}:`, err.message);
     }
   }
 
