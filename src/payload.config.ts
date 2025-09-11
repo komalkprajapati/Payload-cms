@@ -7,7 +7,6 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import {payloadCloudinaryPlugin} from '@jhb.software/payload-cloudinary-plugin'
-
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Navbar } from './globals/Navbar'
